@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddyRI_HCIN6222 Prototype_ST10460576</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Confetti Animation */
+        @keyframes fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti {
+            position: fixed;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            z-index: 9999;
+            animation: fall linear forwards;
+        }
+        
+        /* Step lighting animation */
+        .step-active { color: #2563eb; font-weight: bold; opacity: 1; transition: all 0.3s ease; }
+        .step-pending { opacity: 0.4; transition: all 0.3s ease; }
+        .step-done { color: #10b981; font-weight: bold; opacity: 1; transition: all 0.3s ease; }
+        
+        /* Modal Blur */
+        .modal-overlay { backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-slate-50/50 min-h-screen text-slate-800 antialiased flex flex-col justify-between">
+
+    <nav id="landing-nav" class="bg-white/80 backdrop-blur-md border-b border-slate-100 fixed top-0 w-full z-50 transition-all">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-md shadow-blue-500/20">SB</div>
+                <div>
+                    <span class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">StudyBuddy</span>
+                    <span class="text-xs font-black text-blue-600 ml-1 px-1.5 py-0.5 bg-blue-50 rounded border border-blue-100">RI</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="switchToLecturerView()" class="text-xs font-bold text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-xl transition hover:bg-slate-50">Lecturer Portal</button>
+                <button onclick="switchToStudentView()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm transition hover:shadow-md">Student Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <header id="landing-hero" class="pt-40 pb-20 max-w-7xl mx-auto px-6 lg:px-12 text-center">
+        <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-100/80 px-3 py-1.5 rounded-full text-blue-700 text-xs font-bold mb-6 tracking-wide animate-pulse">
+            <i class="fa-solid fa-graduation-cap"></i> Tailored for Rosebank International Students
+        </div>
+        <h1 class="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.15] mb-6">
+            Real-Time Peer Learning. <br>
+            <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">No Delays. No Isolation.</span>
+        </h1>
+        <p class="text-slate-500 text-base sm:text-lg max-w-2xl mx-auto font-medium leading-relaxed mb-10">
+            Connect instantanously with peer matchings in under 30 seconds. Break through academic friction, resolve module complexities, and learn collaboratively under verified lecturer oversight.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onclick="switchToStudentView()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5">
+                Launch StudyBuddy RI <i class="fa-solid fa-arrow-right ml-2 text-xs opacity-80"></i>
+            </button>
+            <button onclick="switchToLecturerView()" class="w-full sm:w-auto bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm px-8 py-4 rounded-2xl transition">
+                Lecturer Dashboard
+            </button>
+        </div>
+    </header>
+
+    <section id="landing-features" class="max-w-7xl mx-auto px-6 lg:px-12 pb-24 grid sm:grid-cols-3 gap-8">
+        <div class="bg-white border border-slate-100 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-lg font-bold mb-5"><i class="fa-solid fa-bolt"></i></div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">30-Sec Sync Matching</h3>
+            <p class="text-slate-500 text-xs leading-relaxed font-medium">Say goodbye to unanswered forums. Get immediate, live matching with peers available within your current module scope.</p>
+        </div>
+        <div class="bg-white border border-slate-100 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 text-lg font-bold mb-5"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Lecturer Oversight Matrix</h3>
+            <p class="text-slate-500 text-xs leading-relaxed font-medium">Prevent misinformation. All peer study tracks remain transparently auditable by campus instructors to preserve academic integrity.</p>
+        </div>
+        <div class="bg-white border border-slate-100 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-lg font-bold mb-5"><i class="fa-solid fa-award"></i></div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Gamified Social Rewards</h3>
+            <p class="text-slate-500 text-xs leading-relaxed font-medium">Earn peer reputation markers, unlock recognition milestones, and turn collaborative support into accredited achievements.</p>
+        </div>
+    </section>
+
+    <header id="student-app-header" class="bg-white border-b border-slate-200/60 fixed top-0 w-full z-50 hidden">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 cursor-pointer" onclick="exitToPublicLanding()">
+                    <div class="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm">SB</div>
+                    <span class="text-sm font-black tracking-tight text-slate-900">StudyBuddy <span class="text-blue-600">RI</span></span>
+                </div>
+                <nav class="hidden md:flex items-center gap-1 text-xs font-bold">
+                    <button id="tab-btn-dashboard" onclick="navigateTo('dashboard')" class="px-5 py-2 rounded-lg transition bg-white text-blue-600 shadow-sm">Dashboard</button>
+                    <button id="tab-btn-find-buddy" onclick="navigateTo('find-buddy')" class="px-5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900">Find Buddy</button>
+                </nav>
+            </div>
+            
+            <div class="relative">
+                <button onclick="toggleProfileDropdown(event)" class="w-10 h-10 rounded-full bg-slate-900 text-white font-bold tracking-wider hover:bg-blue-600 transition shadow-sm">
+                    NN
+                </button>
+                
+                <div id="profile-dropdown" class="hidden absolute right-0 top-12 w-80 bg-white border border-slate-200 shadow-xl rounded-2xl p-5 z-50">
+                    <div class="border-b border-slate-100 pb-4 mb-4">
+                        <h3 class="text-lg font-black text-slate-900">Nomvula Ntombela</h3>
+                        <p class="text-xs text-slate-500 mt-1">Student No: ST10460576</p>
+                        <p class="text-[10px] text-blue-600 font-bold mt-1 bg-blue-50 inline-block px-2 py-0.5 rounded">Joined: 12 May 2026</p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-black text-slate-900 text-sm">Achievement Badges</h4>
+                        <p class="text-xs text-emerald-600 font-bold mb-3">5 of 8 badges earned</p>
+                        
+                        <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                            <div class="flex items-start gap-3">
+                                <div class="text-xl">🏆</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Top Math Helper</h5>
+                                    <p class="text-[10px] text-slate-500">Helped 50+ students in mathematics</p>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5 inline-block">✓ Earned</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="text-xl">⭐</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">5-Star Peer Contributor</h5>
+                                    <p class="text-[10px] text-slate-500">Maintained 5.0 rating for 20 sessions</p>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5 inline-block">✓ Earned</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="text-xl">🎓</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">First Session</h5>
+                                    <p class="text-[10px] text-slate-500">Completed your first study session</p>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5 inline-block">✓ Earned</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="text-xl">🤝</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Helping Hand</h5>
+                                    <p class="text-[10px] text-slate-500">Helped 10 different students</p>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5 inline-block">✓ Earned</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="text-xl">🔥</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Week Warrior</h5>
+                                    <p class="text-[10px] text-slate-500">7-day study streak</p>
+                                    <span class="text-[9px] font-bold text-emerald-600 mt-0.5 inline-block">✓ Earned</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 opacity-50 grayscale">
+                                <div class="text-xl">💯</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Century Club</h5>
+                                    <p class="text-[10px] text-slate-500">100 study sessions completed</p>
+                                    <span class="text-[9px] font-bold text-slate-400 mt-0.5 inline-block"><i class="fa-solid fa-lock"></i> Locked</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 opacity-50 grayscale">
+                                <div class="text-xl">✨</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Perfect 10</h5>
+                                    <p class="text-[10px] text-slate-500">10 consecutive 5-star ratings</p>
+                                    <span class="text-[9px] font-bold text-slate-400 mt-0.5 inline-block"><i class="fa-solid fa-lock"></i> Locked</span>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 opacity-50 grayscale">
+                                <div class="text-xl">🧠</div>
+                                <div>
+                                    <h5 class="text-xs font-bold text-slate-900">Module Master</h5>
+                                    <p class="text-[10px] text-slate-500">Expert in 5+ modules</p>
+                                    <span class="text-[9px] font-bold text-slate-400 mt-0.5 inline-block"><i class="fa-solid fa-lock"></i> Locked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <header id="lecturer-app-header" class="bg-slate-900 border-b border-slate-800 fixed top-0 w-full z-50 hidden">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="exitToPublicLanding()">
+                <div class="bg-gradient-to-tr from-purple-600 to-pink-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm"> 🎛️ </div>
+                <span class="text-sm font-black tracking-tight text-white">StudyBuddy <span class="text-purple-400">Oversight</span></span>
+                <span class="text-[10px] font-bold bg-purple-500/20 border border-purple-500/30 text-purple-300 px-2 py-0.5 rounded ml-2">Faculty Hub</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs font-bold text-white">Mr Patrick Chikwekwete</div>
+                    <div class="text-[10px] font-medium text-slate-400">Senior Academic Moderator</div>
+                </div>
+                <button onclick="exitToPublicLanding()" class="w-8 h-8 rounded-lg border border-slate-800 hover:bg-slate-800 flex items-center justify-center text-slate-400 text-xs transition"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 lg:px-12 w-full pt-24 flex-grow relative">
+        
+        <div id="page-dashboard" class="page space-y-8 hidden">
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+                    <h3 class="font-black text-slate-900 mb-4">Semester Goal Progress</h3>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-bold text-slate-500">Students to Help</span>
+                        <span class="text-2xl font-black text-blue-600">22 <span class="text-sm text-slate-400">/ 30</span></span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 mb-2">
+                        <div class="bg-blue-600 h-3 rounded-full" style="width: 73%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400">You are 8 students away from reaching your semester target!</p>
+                </div>
+
+                <div class="lg:col-span-2 grid sm:grid-cols-3 gap-4">
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col justify-center text-center">
+                        <div class="text-3xl font-black text-slate-900 mb-1">14</div>
+                        <div class="text-xs font-bold text-slate-500 uppercase">Students Helped</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col justify-center text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-1">4.9 <i class="fa-solid fa-star text-sm"></i></div>
+                        <div class="text-xs font-bold text-slate-500 uppercase">Average Rating</div>
+                    </div>
+                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col justify-center text-center">
+                        <div class="text-3xl font-black text-purple-600 mb-1">840</div>
+                        <div class="text-xs font-bold text-slate-500 uppercase">Reward Points</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                    <h3 class="font-black text-slate-900 mb-4 border-b border-slate-100 pb-3">Available Modules</h3>
+                    <ul class="space-y-3 max-h-[250px] overflow-y-auto pr-2">
+                        <li class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">HCIN 6222</h4>
+                                <p class="text-[10px] text-slate-500">Human Computer Interaction</p>
+                            </div>
+                            <button onclick="navigateTo('find-buddy')" class="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition">Find Buddy</button>
+                        </li>
+                        <li class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">WEDE 5121</h4>
+                                <p class="text-[10px] text-slate-500">Website Development</p>
+                            </div>
+                            <button onclick="navigateTo('find-buddy')" class="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition">Find Buddy</button>
+                        </li>
+                        <li class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">BUSA 7321</h4>
+                                <p class="text-[10px] text-slate-500">Strategic Requirements</p>
+                            </div>
+                            <button onclick="navigateTo('find-buddy')" class="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition">Find Buddy</button>
+                        </li>
+                        <li class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">SAND6221</h4>
+                                <p class="text-[10px] text-slate-500">UML Diagrams</p>
+                            </div>
+                            <button onclick="navigateTo('find-buddy')" class="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition">Find Buddy</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl shadow-md p-6 relative overflow-hidden">
+                    <i class="fa-solid fa-quote-right absolute top-4 right-4 text-6xl opacity-10"></i>
+                    <h3 class="font-black text-lg mb-4">Community Success Stories</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                            <p class="text-xs italic mb-2">"Thanks to StudyBuddy, I finally understood the WCAG frameworks. My peer matched instantly and we knocked out the assignment!"</p>
+                            <p class="text-[10px] font-bold text-blue-200">— Uday Manawer</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                            <p class="text-xs italic mb-2">"I helped 4 students with their Java projects this week and earned the Top Helper badge. The gamification makes studying so much fun."</p>
+                            <p class="text-[10px] font-bold text-blue-200">— Kea Ramere</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-find-buddy" class="page max-w-2xl mx-auto hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-6 sm:p-8 border-b border-slate-100">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Find Your Study Buddy</h2>
+                    <p class="text-slate-400 text-xs font-medium mt-1">Specify your current module target to find available peer matches instantly.</p>
+                </div>
+                
+                <div id="matching-form-view" class="p-6 sm:p-8 space-y-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-black uppercase tracking-wider text-slate-400">Select Target Module Scope</label>
+                        <select id="match-module-input" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:outline-none focus:border-blue-500 transition">
+                            <option value="HCIN 6222">HCIN 6222 — Human Computer Interaction Systems</option>
+                            <option value="XBCS 6212">WEDE 5121 — Introduction to HTML</option>
+                            <option value="BUSA 7321">BUSA 7321 — Strategic Requirements Engineering</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-black uppercase tracking-wider text-slate-400">Select System Interaction Alignment Role</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="border-2 border-blue-600 bg-blue-50/20 rounded-xl p-4 flex flex-col justify-between h-24 cursor-pointer relative group">
+                                <input type="radio" name="role-select" value="requester" checked class="absolute top-4 right-4 accent-blue-600">
+                                <span class="text-xl"> 🙋🏽‍♂️ </span>
+                                <span class="block text-xs font-black text-slate-900">Requester (Need Help)</span>
+                            </label>
+                            <label class="border border-slate-200 hover:border-slate-300 rounded-xl p-4 flex flex-col justify-between h-24 cursor-pointer relative group transition">
+                                <input type="radio" name="role-select" value="helper" class="absolute top-4 right-4 accent-blue-600">
+                                <span class="text-xl"> 💡 </span>
+                                <span class="block text-xs font-black text-slate-900">Helper (Provide Support)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="triggerEngineSearch()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3.5 rounded-xl shadow-md transition">Initialize Instantanous Sweep</button>
+                </div>
+
+                <div id="matching-engine-searching" class="p-12 space-y-8 hidden flex flex-col items-center justify-center">
+                    <h3 class="text-2xl font-black text-slate-900 tracking-tight">Find Your Study Buddy...</h3>
+                    
+                    <div class="text-center">
+                        <span id="searching-module-label" class="bg-blue-100 text-blue-700 font-bold px-4 py-2 rounded-xl border border-blue-200">HCIN 6222</span>
+                    </div>
+
+                    <div class="text-4xl font-mono font-black text-slate-800" id="search-timer-display">00:00</div>
+
+                    <ul class="text-sm space-y-3 font-bold w-full max-w-sm mx-auto text-left pl-10 border-l-2 border-slate-200">
+                        <li id="step-1" class="step-pending relative">
+                            <span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span>
+                            Searching for available students...
+                        </li>
+                        <li id="step-2" class="step-pending relative">
+                            <span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span>
+                            Checking module compatibility...
+                        </li>
+                        <li id="step-3" class="step-pending relative">
+                            <span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span>
+                            Verifying availability...
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-match-found" class="page max-w-xl mx-auto hidden text-center pt-10">
+            <h2 class="text-4xl font-black text-slate-900 mb-8 animate-bounce">Match Found!</h2>
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl">
+                <div class="w-24 h-24 bg-gradient-to-tr from-emerald-400 to-teal-500 rounded-full mx-auto flex items-center justify-center text-4xl text-white shadow-lg mb-4">
+                    YZ
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 mb-2">Yolanda Zoleka</h3>
+                <div class="flex justify-center items-center gap-4 text-sm font-bold text-slate-600 mb-8">
+                    <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg"><i class="fa-solid fa-star"></i> 4.9 Rating</span>
+                    <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg"><i class="fa-solid fa-graduation-cap"></i> 82 Sessions</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="cancelMatch()" class="bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl transition">Cancel</button>
+                    <button onclick="showPermissionModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition">Join Session</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="permission-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+            <div class="absolute inset-0 bg-slate-900/40 modal-overlay"></div>
+            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative z-10 mx-4">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl mx-auto mb-4">
+                        <i class="fa-solid fa-video"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 mb-2">Grant Device Access</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed font-medium">This study session requires camera and microphone access to enable video communication with your study buddy. Your privacy is protected and the session is monitored by faculty for academic integrity.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="declinePermission()" class="border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold py-3 rounded-xl transition">Cancel</button>
+                    <button onclick="acceptPermission()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">Yes, continue</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-study-room" class="page hidden h-[80vh] flex flex-col">
+            <div class="bg-slate-900 text-white px-6 py-3 rounded-t-2xl flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                    <span class="font-bold text-sm">Live Room: <span id="room-module-title">HCIN 6222</span></span>
+                    <span class="bg-white/20 text-[10px] px-2 py-1 rounded font-mono ml-2">Lecturer Monitoring Active</span>
+                </div>
+                <div class="font-mono font-bold text-lg" id="live-session-timer">00:00</div>
+            </div>
+            
+            <div class="flex-grow flex flex-col lg:flex-row bg-slate-950 p-4 gap-4 overflow-hidden rounded-b-2xl">
+                <div class="flex-grow flex flex-col gap-4">
+                    <div class="bg-slate-800 rounded-xl relative flex-grow flex items-center justify-center overflow-hidden border border-slate-700">
+                        <div class="text-center">
+                            <div class="w-24 h-24 bg-gradient-to-tr from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-4xl text-white shadow-lg mx-auto mb-2">SJ</div>
+                            <span class="text-white font-bold text-sm">Yolanda Zoleka (Buddy Helping)</span>
+                        </div>
+                        <div class="absolute bottom-4 left-4 bg-black/50 text-white text-[10px] px-2 py-1 rounded font-bold backdrop-blur-sm">Yolanda (Helper)</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl relative h-1/3 flex items-center justify-center overflow-hidden border border-slate-700">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-slate-600 rounded-full flex items-center justify-center text-2xl text-white shadow-lg mx-auto mb-2">NN</div>
+                        </div>
+                        <div class="absolute bottom-4 left-4 bg-black/50 text-white text-[10px] px-2 py-1 rounded font-bold backdrop-blur-sm">You (Being Helped)</div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-80 bg-white rounded-xl flex flex-col overflow-hidden shrink-0">
+                    <div class="bg-slate-100 p-3 border-b border-slate-200 text-xs font-bold text-slate-700">Live Chat</div>
+                    <div id="live-chat-container" class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50">
+                        <div class="text-[10px] text-center text-slate-400 font-bold mb-4">Session Started. Academic Integrity Guidelines Apply.</div>
+                    </div>
+                    <div class="p-3 border-t border-slate-200 bg-white flex gap-2">
+                        <input type="text" id="live-chat-input" placeholder="Type message..." onkeydown="if(event.key === 'Enter') sendLiveChat()" class="flex-grow bg-slate-100 border-none rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="sendLiveChat()" class="bg-blue-600 text-white rounded-lg px-3 text-xs font-bold hover:bg-blue-700 transition"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-4 rounded-xl mt-4 flex justify-center items-center gap-6 shrink-0">
+                <button class="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center transition text-lg"><i class="fa-solid fa-microphone"></i></button>
+                <button class="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 text-white flex items-center justify-center transition text-lg"><i class="fa-solid fa-video"></i></button>
+                <button onclick="endSessionCall()" class="w-16 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition text-xl shadow-lg"><i class="fa-solid fa-phone-slash"></i></button>
+            </div>
+        </div>
+
+        <div id="page-rating" class="page max-w-xl mx-auto hidden pt-10">
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl text-center">
+                <h2 class="text-2xl font-black text-slate-900 mb-2">Session Complete!</h2>
+                <p class="text-sm text-slate-500 mb-8 font-medium">How was your peer learning experience with Yolanda Zoleka?</p>
+                
+                <div class="flex justify-center gap-2 mb-8" id="star-rating">
+                    <i class="fa-solid fa-star text-4xl text-slate-200 hover:text-amber-400 cursor-pointer transition"></i>
+                    <i class="fa-solid fa-star text-4xl text-slate-200 hover:text-amber-400 cursor-pointer transition"></i>
+                    <i class="fa-solid fa-star text-4xl text-slate-200 hover:text-amber-400 cursor-pointer transition"></i>
+                    <i class="fa-solid fa-star text-4xl text-slate-200 hover:text-amber-400 cursor-pointer transition"></i>
+                    <i class="fa-solid fa-star text-4xl text-slate-200 hover:text-amber-400 cursor-pointer transition"></i>
+                </div>
+
+                <div class="text-left mb-6">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">Share a brief testimonial (optional)</label>
+                    <textarea class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm focus:outline-none focus:border-blue-500 resize-none h-24" placeholder="Yolanda helped me understand the concepts perfectly..."></textarea>
+                </div>
+
+                <button onclick="submitRating()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition text-lg">Submit & Finish</button>
+            </div>
+        </div>
+
+        <div id="page-lecturer" class="page space-y-8 hidden">
+            <div class="border-b border-slate-800 pb-6">
+                <h2 class="text-2xl font-black text-white tracking-tight">Lecturer Compliance & Oversight Registry</h2>
+                <p class="text-slate-400 text-xs font-medium mt-1">Real-time chat trace tracking, content verification safeguards, and systemic audit oversight loops.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800 border border-slate-700 rounded-full aspect-square flex flex-col items-center justify-center text-center shadow-lg transform hover:scale-105 transition">
+                    <span class="text-4xl font-black text-blue-400 mb-1 animate-pulse">24</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider px-4">Live Sessions Taking Place</span>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-full aspect-square flex flex-col items-center justify-center text-center shadow-lg transform hover:scale-105 transition">
+                    <span class="text-4xl font-black text-emerald-400 mb-1">48</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider px-4">Students Online</span>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-full aspect-square flex flex-col items-center justify-center text-center shadow-lg transform hover:scale-105 transition">
+                    <span class="text-4xl font-black text-purple-400 mb-1">42s</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider px-4">Average Match Time</span>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-full aspect-square flex flex-col items-center justify-center text-center shadow-lg transform hover:scale-105 transition">
+                    <span class="text-4xl font-black text-amber-400 mb-1">4.8</span>
+                    <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider px-4">Average Session Rating</span>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-6 items-start">
+                <div class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                    <div class="bg-slate-800/60 border-b border-slate-800 px-5 py-4 flex justify-between items-center">
+                        <span class="text-xs font-black text-slate-300 uppercase tracking-wider"><i class="fa-solid fa-eye text-blue-400 mr-2"></i> Live Sessions Monitoring</span>
+                        <span class="text-[10px] bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded font-mono animate-pulse">Monitoring Active</span>
+                    </div>
+                    <div class="p-4 space-y-3 text-xs font-medium">
+                        <div class="bg-slate-950 border border-slate-800/60 hover:border-purple-500/40 p-4 rounded-xl flex flex-col sm:flex-row justify-between gap-y-3 transition">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-slate-800 text-slate-300 px-2 py-0.5 font-mono text-[9px] font-bold rounded">HCIN 6222</span>
+                                    <h4 class="text-white font-bold">Nomvula N. ↔ Yolanda Z.</h4>
+                                </div>
+                                <p class="text-slate-400 text-[11px] font-mono italic">"Let's make sure our file structures separate the concerns cleanly..."</p>
+                            </div>
+                            <div class="flex sm:flex-col justify-between sm:justify-center items-end gap-1 text-right">
+                                <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono text-[9px] font-bold">Secure</span>
+                                <span class="text-slate-500 text-[10px]">Track: 4m 12s</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950 border border-slate-800/60 hover:border-purple-500/40 p-4 rounded-xl flex flex-col sm:flex-row justify-between gap-y-3 transition">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="bg-slate-800 text-slate-300 px-2 py-0.5 font-mono text-[9px] font-bold rounded">BUSA 7321</span>
+                                    <h4 class="text-white font-bold">Kea R. ↔ Uday M.</h4>
+                                </div>
+                                <p class="text-slate-400 text-[11px] font-mono italic">"Evaluating the MoSCoW prioritization metrics..."</p>
+                            </div>
+                            <div class="flex sm:flex-col justify-between sm:justify-center items-end gap-1 text-right">
+                                <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-mono text-[9px] font-bold">Secure</span>
+                                <span class="text-slate-500 text-[10px]">Track: 12m 40s</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-emerald-900/30 border border-emerald-800/50 rounded-2xl p-5 shadow-md">
+                        <h3 class="font-bold text-white text-sm mb-2 flex items-center gap-2"><i class="fa-solid fa-shield-check text-emerald-400"></i> Integrity Status</h3>
+                        <p class="text-emerald-200/80 text-xs leading-relaxed font-medium">All sessions today maintained academic integrity standards with no flags raised and a total of 142 sessions reviewed.</p>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md">
+                        <h3 class="font-bold text-white text-sm mb-4">Analytical Report</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1 font-bold"><span>HCIN 6222 (4.9⭐)</span><span>85% Match Rate</span></div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-blue-500 h-1.5 rounded-full" style="width: 85%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1 font-bold"><span>SAND6221 (4.7⭐)</span><span>72% Match Rate</span></div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-purple-500 h-1.5 rounded-full" style="width: 72%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-slate-400 mb-1 font-bold"><span>BUSA 7321 (4.8⭐)</span><span>91% Match Rate</span></div>
+                                <div class="w-full bg-slate-800 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 91%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-md">
+                        <h3 class="font-bold text-white text-sm mb-3">Recent Activity</h3>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                                <span class="text-slate-300">14 matches made</span>
+                                <span class="text-slate-500 font-mono text-[9px]">HCIN 6222</span>
+                            </li>
+                            <li class="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                                <span class="text-slate-300">8 matches made</span>
+                                <span class="text-slate-500 font-mono text-[9px]">SAND 6221</span>
+                            </li>
+                            <li class="flex justify-between items-center text-xs">
+                                <span class="text-slate-300">22 matches made</span>
+                                <span class="text-slate-500 font-mono text-[9px]">BUSA 7321</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/60 py-6 text-center text-xs font-medium text-slate-400 mt-12 w-full z-10 relative">
+        <div class="max-w-7xl mx-auto px-12 flex flex-col sm:flex-row justify-between items-center gap-y-2">
+            <p>&copy; 2026 Nomvula Ntombela ST10460576. All Rights Reserved.</p>
+            <p class="font-mono text-[10px] bg-slate-50 border px-3 py-1 rounded-md">ST10460576 — HCIN6222 Prototype</p>
+        </div>
+    </footer>
+
+    <script>
+        // ROUTING
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) targetPage.classList.remove('hidden');
+
+            const tabs = ['dashboard', 'find-buddy'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById(`tab-btn-${tab}`);
+                if (btn) {
+                    if (tab === pageId) {
+                        btn.className = "px-5 py-2 rounded-lg transition bg-white text-blue-600 shadow-sm";
+                    } else {
+                        btn.className = "px-5 py-2 rounded-lg transition text-slate-600 hover:text-slate-900";
+                    }
+                }
+            });
+
+            if (pageId === 'lecturer') {
+                document.body.className = "bg-slate-950 min-h-screen text-slate-100 antialiased flex flex-col justify-between";
+                document.querySelector('footer').classList.replace('bg-white', 'bg-slate-900');
+                document.querySelector('footer').classList.replace('border-slate-200/60', 'border-slate-800');
+            } else {
+                document.body.className = "bg-slate-50/50 min-h-screen text-slate-800 antialiased flex flex-col justify-between";
+                document.querySelector('footer').classList.replace('bg-slate-900', 'bg-white');
+                document.querySelector('footer').classList.replace('border-slate-800', 'border-slate-200/60');
+            }
+        }
+
+        function switchToStudentView() {
+            document.getElementById('landing-hero').classList.add('hidden');
+            document.getElementById('landing-features').classList.add('hidden');
+            document.getElementById('landing-nav').classList.add('hidden');
+            document.getElementById('lecturer-app-header').classList.add('hidden');
+            document.getElementById('student-app-header').classList.remove('hidden');
+            navigateTo('dashboard');
+        }
+
+        function switchToLecturerView() {
+            document.getElementById('landing-hero').classList.add('hidden');
+            document.getElementById('landing-features').classList.add('hidden');
+            document.getElementById('landing-nav').classList.add('hidden');
+            document.getElementById('student-app-header').classList.add('hidden');
+            document.getElementById('lecturer-app-header').classList.remove('hidden');
+            navigateTo('lecturer');
+        }
+
+        function exitToPublicLanding() {
+            document.getElementById('student-app-header').classList.add('hidden');
+            document.getElementById('lecturer-app-header').classList.add('hidden');
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById('landing-nav').classList.remove('hidden');
+            document.getElementById('landing-hero').classList.remove('hidden');
+            document.getElementById('landing-features').classList.remove('hidden');
+            document.body.className = "bg-slate-50/50 min-h-screen text-slate-800 antialiased flex flex-col justify-between";
+        }
+
+        // PROFILE DROPDOWN
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('profile-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profile-dropdown');
+            if(dropdown && !dropdown.classList.contains('hidden') && !e.target.closest('#profile-dropdown')) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // MATCHING ENGINE & TIMER
+        let searchInterval;
+        let searchSeconds = 0;
+
+        function triggerEngineSearch() {
+            const formView = document.getElementById('matching-form-view');
+            const searchingOverlay = document.getElementById('matching-engine-searching');
+            const targetModule = document.getElementById('match-module-input').value;
+            
+            document.getElementById('searching-module-label').textContent = targetModule;
+            formView.classList.add('hidden');
+            searchingOverlay.classList.remove('hidden');
+            
+            // Reset steps
+            document.getElementById('step-1').className = 'step-pending relative text-slate-400';
+            document.getElementById('step-1').innerHTML = '<span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span> Searching for available students...';
+            document.getElementById('step-2').className = 'step-pending relative text-slate-400';
+            document.getElementById('step-2').innerHTML = '<span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span> Checking module compatibility...';
+            document.getElementById('step-3').className = 'step-pending relative text-slate-400';
+            document.getElementById('step-3').innerHTML = '<span class="absolute -left-[45px] w-3 h-3 rounded-full bg-slate-300 top-1"></span> Verifying availability...';
+
+            searchSeconds = 0;
+            document.getElementById('search-timer-display').textContent = "00:00";
+            
+            searchInterval = setInterval(() => {
+                searchSeconds++;
+                document.getElementById('search-timer-display').textContent = "00:" + (searchSeconds < 10 ? "0" + searchSeconds : searchSeconds);
+                
+                if (searchSeconds === 2) {
+                    setStepActive('step-1');
+                } else if (searchSeconds === 4) {
+                    setStepDone('step-1');
+                    setStepActive('step-2');
+                } else if (searchSeconds === 6) {
+                    setStepDone('step-2');
+                    setStepActive('step-3');
+                } else if (searchSeconds === 8) {
+                    setStepDone('step-3');
+                    clearInterval(searchInterval);
+                    showMatchFound();
+                }
+            }, 1000); // Simulated faster for prototype view, but logic remains
+        }
+
+        function setStepActive(id) {
+            const el = document.getElementById(id);
+            el.className = 'step-active relative text-blue-600';
+            el.innerHTML = '<span class="absolute -left-[45px] w-3 h-3 rounded-full bg-blue-500 top-1 shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse"></span>' + el.innerText;
+        }
+        function setStepDone(id) {
+            const el = document.getElementById(id);
+            el.className = 'step-done relative text-emerald-500';
+            el.innerHTML = '<span class="absolute -left-[45px] w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center top-0.5"><i class="fa-solid fa-check text-[8px] text-emerald-600"></i></span>' + el.innerText;
+        }
+
+        function showMatchFound() {
+            document.getElementById('page-find-buddy').classList.add('hidden');
+            document.getElementById('page-match-found').classList.remove('hidden');
+            fireConfetti();
+        }
+
+        function cancelMatch() {
+            clearInterval(searchInterval);
+            document.getElementById('page-match-found').classList.add('hidden');
+            document.getElementById('matching-engine-searching').classList.add('hidden');
+            document.getElementById('matching-form-view').classList.remove('hidden');
+            navigateTo('find-buddy');
+        }
+
+        function fireConfetti() {
+            const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#fbbf24', '#f43f5e'];
+            for(let i=0; i<50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        // PERMISSIONS MODAL
+        function showPermissionModal() {
+            document.getElementById('permission-modal').classList.remove('hidden');
+        }
+        function declinePermission() {
+            document.getElementById('permission-modal').classList.add('hidden');
+        }
+        function acceptPermission() {
+            document.getElementById('permission-modal').classList.add('hidden');
+            document.getElementById('page-match-found').classList.add('hidden');
+            startLiveSession();
+        }
+
+        // LIVE ROOM LOGIC
+        let liveRoomTimer;
+        let liveSeconds = 0;
+
+        function startLiveSession() {
+            navigateTo('study-room');
+            document.getElementById('room-module-title').textContent = document.getElementById('match-module-input').value;
+            
+            liveSeconds = 0;
+            document.getElementById('live-session-timer').textContent = "00:00";
+            document.getElementById('live-chat-container').innerHTML = `<div class="text-[10px] text-center text-slate-400 font-bold mb-4">Session Started. Academic Integrity Guidelines Apply.</div>`;
+            
+            liveRoomTimer = setInterval(() => {
+                liveSeconds++;
+                const mins = Math.floor(liveSeconds / 60);
+                const secs = liveSeconds % 60;
+                document.getElementById('live-session-timer').textContent = 
+                    (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
+            }, 1000);
+        }
+
+        function sendLiveChat() {
+            const input = document.getElementById('live-chat-input');
+            const container = document.getElementById('live-chat-container');
+            if(!input.value.trim()) return;
+
+            const msg = document.createElement('div');
+            msg.className = "bg-blue-600 text-white p-2 rounded-lg text-xs max-w-[85%] ml-auto";
+            msg.textContent = input.value;
+            container.appendChild(msg);
+            input.value = "";
+            container.scrollTop = container.scrollHeight;
+
+            // Fake reply
+            setTimeout(() => {
+                const reply = document.createElement('div');
+                reply.className = "bg-slate-200 text-slate-700 p-2 rounded-lg text-xs max-w-[85%]";
+                reply.textContent = "Got it! Let's work through that together.";
+                container.appendChild(reply);
+                container.scrollTop = container.scrollHeight;
+            }, 1500);
+        }
+
+        function endSessionCall() {
+            clearInterval(liveRoomTimer);
+            document.getElementById('page-study-room').classList.add('hidden');
+            document.getElementById('page-rating').classList.remove('hidden');
+        }
+
+        // RATING SYSTEM
+        function submitRating() {
+            alert("Thank you! Your testimonial and rating have been submitted successfully.");
+            
+            // reset UI state
+            document.getElementById('page-rating').classList.add('hidden');
+            document.getElementById('matching-engine-searching').classList.add('hidden');
+            document.getElementById('matching-form-view').classList.remove('hidden');
+            
+            navigateTo('dashboard');
+        }
+
+        // Star click visual toggle
+        const stars = document.querySelectorAll('#star-rating i');
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                stars.forEach((s, i) => {
+                    if(i <= index) {
+                        s.classList.replace('text-slate-200', 'text-amber-400');
+                    } else {
+                        s.classList.replace('text-amber-400', 'text-slate-200');
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
